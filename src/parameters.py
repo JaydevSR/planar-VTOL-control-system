@@ -11,3 +11,4 @@ g = 9.81       # m s^-2
 # For drawing
 rad_rot = d / 3
 side_bod = d / 2
+side_tar = d / 2
