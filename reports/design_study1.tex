@@ -1,0 +1,186 @@
+\documentclass[12pt]{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{bm}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{enumerate}
+\usepackage{hyperref}
+
+\usetikzlibrary{positioning}
+
+%
+% Basic Document Settings
+%
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan,
+    filecolor=magenta,      
+    urlcolor=blue,
+    pdftitle={Jaydev Singh Rao (19147): Planar VTOL Design Study}
+    }
+
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+\linespread{1.1}
+
+\pagestyle{fancy}
+\lhead{\tiny{\hmwkAuthorName \space \hmwkAuthorRoll}}
+\rhead{\tiny{\hmwkClass \ (\projecttitle)}}
+\cfoot{\tiny\thepage}
+
+\renewcommand\headrulewidth{0.4pt}
+\renewcommand\footrulewidth{0.4pt}
+
+\setlength\parindent{0pt}
+
+\setcounter{secnumdepth}{0}
+\newcounter{objectivecounter}
+\setcounter{objectivecounter}{1}
+\nobreak\extramarks{Objective \arabic{objectivecounter}}{}\nobreak{}
+
+%
+% Homework Problem Environment
+%
+% This environment takes an optional argument. When given, it will adjust the
+% problem counter. This is useful for when the problems given for your
+% assignment aren't sequential. See the last 3 problems of this template for an
+% example.
+%
+\newenvironment{Objective}[1]{
+    \section{\arabic{objectivecounter}. #1}
+    \stepcounter{objectivecounter}
+}{}
+
+\newcommand{\projecttitle}{Planar VTOL System}
+\newcommand{\hmwkTitle}{Design Study}
+\newcommand{\hmwkClass}{ECS 323: Control Systems}
+\newcommand{\hmwkAuthorName}{Jaydev Singh Rao}
+\newcommand{\hmwkAuthorRoll}{19147}
+
+%
+% Title Page
+%
+
+\title{
+    \vspace{1in}
+    \hrule
+    \vspace{0.25in}
+    \textmd{\textbf{\Huge \hmwkClass}}\\
+    \vspace{1in}
+    \textmd{\textbf{\Huge \projecttitle}} \\
+    \vspace{0.1in}\normalsize{\textmd{\LARGE \hmwkTitle}}\\
+    \vspace{1in}
+    \normalsize\vspace{0.1in}\LARGE{Submitted by: \hmwkAuthorName}\\
+    \normalsize\vspace{0.1in}\LARGE{Roll No. : \hmwkAuthorRoll}
+}
+
+\author{}
+\date{}
+
+%
+% Various Helper Commands
+%
+
+% For derivatives
+\newcommand{\de}[2]{\cfrac{\mathrm{d}#1}{\mathrm{d}#2}}
+
+% For partial derivatives
+\newcommand{\pde}[2]{\cfrac{\partial #1}{\partial #2}}
+
+%integral
+\newcommand{\integrate}[4]{\displaystyle \int_{#3}^{#4} #1 \mathrm{d}#2}
+
+% Integral dx
+\newcommand{\dx}{\mathrm{d}x}
+
+% Alias for the Solution section header
+\newcommand{\solution}{\textbf{\large Solution}}
+
+% Centered figure
+\newcommand{\centerfig}[4][0.35]{
+    \begin{figure}[H]
+        \centering
+        \fbox{\includegraphics[scale=#1]{#2}}
+        \caption{#3}
+        \label{fig:#4}
+    \end{figure}
+    }
+
+\begin{document}
+
+    \maketitle
+    \hrule
+    \pagebreak
+    \tableofcontents
+    \pagebreak
+
+    \begin{Objective}{Design Study Description}
+        In this design study we need to design a control system for the given planar VTOL system with the parameters:
+        \begin{itemize}
+            \item $M_c=2 \text{ kg}$
+            \item $J_c = 0.009 \text{ kg m$^2$}$
+            \item $m_l = 0.3 \text{ kg}$
+            \item $m_r = 0.3 \text{ kg}$
+            \item $d = 0.28 \text{ m}$
+            \item $\mu = 0.21 \text{ kg s$^{-1}$}$
+        \end{itemize}
+        \centerfig[0.5]{./planar_vtol_diagram.png}{Planar VTOL System}{vtol_fig}
+    \end{Objective}
+
+    \pagebreak
+
+    \begin{Objective}{Kinetic Energy}
+        The postions of the various components of the VTOL are given by:
+        \[ 
+            \begin{split}
+                \mathbf{p_c} & = (z_v,\ h) \\
+                \mathbf{p_l} & = (z_v - d \cos\theta,\ h - d \sin\theta) \\
+                \mathbf{p_r} & = (z_v + d \cos\theta,\ h + d \sin\theta)
+            \end{split}    
+        \]
+        So, the velocities can be written as:
+        \[ 
+            \begin{split}
+                \mathbf{v_c} & = (\dot z_v,\ \dot h) \\
+                \mathbf{v_l} & = (\dot z_v + d\dot \theta \sin\theta,\ \dot h - d \dot \theta \cos\theta) \\
+                \mathbf{v_r} & = (\dot z_v - d \dot \theta \sin \theta,\ \dot h + d \dot \theta \cos \theta)
+            \end{split}    
+        \]
+
+        Kinetic energy of the centerpod is given by:
+        \begin{equation}
+            \label{KE_pod}
+            K_{pod} = \frac12 m_c \mathbf{v}_c^T \mathbf{v}_c + \frac12 \bm{\omega}_c^TJ_c \bm{\omega}_c = \frac12 m_c (\dot z_v^2 + \dot h^2) + \frac12 J_c \dot \theta ^2
+        \end{equation}
+
+        Kinetic energy of the left and right rotors is given by:
+        \begin{equation}
+            \label{KE_rotors}
+            \begin{split}
+                K_{rotors} & = \frac12 m_l \mathbf{v}_l^T \mathbf{v}_l + \frac12 m_r \mathbf{v}_r^T \mathbf{v}_r \\
+                    & = \frac12 m_l (\dot z_v + d\dot \theta \sin\theta)^2 + \frac12 m_l (\dot h - d \dot \theta \cos\theta)^2 \\
+                    & \quad + \frac12 m_r (\dot z_v - d\dot \theta \sin\theta)^2 + \frac12 m_l (\dot h + d \dot \theta \cos\theta)^2 \\
+                    & = \frac12 (m_l + m_r) (\dot z_v^2 + \dot h^2) + \frac12 (m_l + m_r) d^2 \dot \theta^2 \\
+                    & \quad + (m_l-m_r)(\dot z_v \sin \theta - \dot h \cos \theta) d\dot \theta
+            \end{split}
+        \end{equation}
+
+        Now, the total kinetic energy of the VTOL will be given by the sum of \ref{KE_pod} and \ref{KE_rotors}:
+        \begin{equation}
+            \label{KE_vtol}
+            K_{V} = K_{pod} + K_{rotors}
+        \end{equation}
+    \end{Objective}
+
+\end{document}

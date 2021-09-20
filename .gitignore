@@ -130,3 +130,6 @@ dmypy.json
 
 # VSCode
 settings.json
+
+#TeX
+*.synctex.gz
