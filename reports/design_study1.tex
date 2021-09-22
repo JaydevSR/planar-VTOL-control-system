@@ -19,7 +19,7 @@
 %
 \hypersetup{
     colorlinks=true,
-    linkcolor=cyan,
+    linkcolor=magenta,
     filecolor=magenta,      
     urlcolor=blue,
     pdftitle={Jaydev Singh Rao (19147): Planar VTOL Design Study}
@@ -179,8 +179,94 @@
         Now, the total kinetic energy of the VTOL will be given by the sum of \ref{KE_pod} and \ref{KE_rotors}:
         \begin{equation}
             \label{KE_vtol}
-            K_{V} = K_{pod} + K_{rotors}
+            \begin{split}
+                K_{V} & = K_{pod} + K_{rotors} \\
+                & = \frac12 (m_c + m_l + m_r) (\dot z_v^2 + \dot h^2) + \frac12 (m_l d^2 + m_r d^2 + J_c) \dot\theta^2 \\
+                & \quad\quad + (m_ld - m_rd)(\dot z_v \sin \theta - \dot h \cos \theta) \dot \theta
+            \end{split}
         \end{equation}
+
+        As in the given parameters $m_l = m_r$, so the last term in the kinetic energy is zero and will be ignored in the rest of the report.
+    \end{Objective}
+
+    \pagebreak
+
+    \begin{Objective}{Equations of Motion}
+        \begin{enumerate}[(a)]
+            \item Now in order to determine the equations of motion of the VTOL, we first write its potential energy. The potential energy is due to the gravitational potential and can be written as the sum of potential energies of the individual components:
+            \begin{equation}
+                \label{PE_vtol}
+                P_V = m_c g h + m_l g h + m_r g h = (m_c + m_l + m_r) g h
+            \end{equation}
+
+            \item Now as we are only considering the dynamics of the VTOL and not of the target so the generalized coordinates can be defined as:
+            \[\mathbf q = \begin{pmatrix}
+                z_v \\ h \\ \theta
+            \end{pmatrix}\]
+
+            Also as it is given in the project objective, the damping forces in the system are due to the momentum drag which is caused by the change in direction of the air when it flows through the rotors. This momentum drag can be modeled as $F_{drag} = -\mu \dot z_v$. So, we can write the dissipative (drag) forces as:
+            \[- B\mathbf{\dot q} = - \begin{pmatrix}
+                \mu \dot z_v \\ 0 \\ 0
+            \end{pmatrix} = - \begin{pmatrix}
+                \mu & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 0
+            \end{pmatrix} \begin{pmatrix}
+                \dot z_v \\ \dot h \\ \dot \theta
+            \end{pmatrix}\]
+
+            \item The total force on the COM of the VTOL is given by $\boxed{F = f_l + f_r}$. The torque due to the left rotor is $\tau_l = - f_l d$ (using right handed coordinates) and the torque due to the right rotor is $\tau_r = f_r d$. Hence, the total torque about the COM of the VTOL is $\boxed{\tau = (f_r - f_l) d}$. So, we can write the generalized forces as:
+            \[\bm\Phi = \begin{pmatrix}
+                - F \sin \theta \\ F \cos \theta \\ \tau
+            \end{pmatrix} = \begin{pmatrix}
+                - (f_r + f_l) \sin \theta \\ (f_r + f_l) \cos \theta \\ (fr - f_l) d
+            \end{pmatrix}\]
+
+            \item Using the kinetic and the potential energies (eq. \ref{KE_vtol} and eq. \ref{PE_vtol}) we can write the Lagrangian as:
+            \[
+                \begin{split}
+                    \mathcal{L} & = K_V - P_V = \frac12 M_V (\dot z_v^2 + \dot h^2 - 2gh) + \frac12 J_V \dot\theta^2
+                \end{split}
+            \]
+            Here, $M_V \equiv (m_c + m_l + m_r)$ and $J_V \equiv (m_l d^2 + m_r d^2 + J_c)$. Now, we can write:
+            \[
+                \pde{\mathcal L}{\mathbf{\dot q}} = \begin{pmatrix}
+                    M_V\dot z_v \\ M_V \dot h \\ J_V \dot\theta
+                \end{pmatrix}
+            \]
+
+            And,
+            \[
+                \pde{\mathcal L}{\mathbf{q}} = \begin{pmatrix}
+                    0 \\ - M_V g \\ 0
+                \end{pmatrix} 
+            \]
+
+            Writing the Euler-Lagrange equations in matrix form:
+            \[
+                \de{}{t}\biggl(\pde{\mathcal L}{\mathbf{\dot q}}\biggr) - \pde{\mathcal L}{\mathbf{q}} = \bm \Phi - B\mathbf{\dot q}
+            \]
+            \[
+                \implies \begin{pmatrix}
+                    M_V\ddot z_v \\ M_V \ddot h \\ J_V \ddot\theta
+                \end{pmatrix} - \begin{pmatrix}
+                    0 \\ - M_V g \\ 0
+                \end{pmatrix} = \begin{pmatrix}
+                    - F \sin \theta \\ F \cos \theta \\ \tau
+                \end{pmatrix} - \begin{pmatrix}
+                    \mu \dot z_v \\ 0 \\ 0
+                \end{pmatrix}
+            \]
+            \begin{equation}
+                \label{EOM_vtol}
+                \implies
+                \boxed{
+                    \begin{pmatrix}
+                        M_V\ddot z_v \\ M_V \ddot h \\ J_V \ddot\theta
+                    \end{pmatrix} = \begin{pmatrix}
+                        \mu \dot z_v - F \sin \theta \\ M_V g + F \cos \theta \\ \tau
+                    \end{pmatrix}
+                }
+            \end{equation}
+        \end{enumerate}
     \end{Objective}
 
 \end{document}

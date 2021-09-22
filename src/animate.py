@@ -1,6 +1,7 @@
-import matplotlib.pyplot as plt
 import matplotlib.patches as patch
+import matplotlib.pyplot as plt
 import numpy as np
+
 import parameters as par
 
 
@@ -70,10 +71,13 @@ if __name__ == "__main__":
     anim = Animation()
     delta = 0.1
     t = z = h = theta = 0
-    while (t < 10):
-        anim.draw_figure(h, z, np.sin(theta), z+0.5)
+    h = 4
+    while (t < 20):
+        anim.draw_figure(h * (np.sin(t) ** 2) + 1,
+                         z + 0.5 * np.sin(t),
+                         np.sin(theta),
+                         z + 0.5 * np.cos(t))
         t += delta
-        h += delta
         z += delta
         theta += delta
     plt.ioff()
