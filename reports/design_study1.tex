@@ -12,7 +12,9 @@
 \usepackage{enumerate}
 \usepackage{hyperref}
 
-\usetikzlibrary{positioning}
+\usetikzlibrary{positioning, arrows}
+\tikzstyle{int}=[draw, fill=blue!20, minimum size=4em]
+\tikzstyle{init} = [pin edge={to-,thin,black}]
 
 %
 % Basic Document Settings
@@ -49,14 +51,6 @@
 \setcounter{objectivecounter}{1}
 \nobreak\extramarks{Objective \arabic{objectivecounter}}{}\nobreak{}
 
-%
-% Homework Problem Environment
-%
-% This environment takes an optional argument. When given, it will adjust the
-% problem counter. This is useful for when the problems given for your
-% assignment aren't sequential. See the last 3 problems of this template for an
-% example.
-%
 \newenvironment{Objective}[1]{
     \section{\arabic{objectivecounter}. #1}
     \stepcounter{objectivecounter}
@@ -126,7 +120,7 @@
     \pagebreak
 
     \begin{Objective}{Design Study Description}
-        In this design study we need to design a control system for the given planar VTOL system with the parameters:
+        In this design study we need to design a control system for a planar VTOL system with the given parameters \cite{controlbook}:
         \begin{itemize}
             \item $M_c=2 \text{ kg}$
             \item $J_c = 0.009 \text{ kg m$^2$}$
@@ -176,7 +170,7 @@
             \end{split}
         \end{equation}
 
-        Now, the total kinetic energy of the VTOL will be given by the sum of \ref{KE_pod} and \ref{KE_rotors}:
+        Now, the total kinetic energy of the VTOL will be given by the sum of (\ref{KE_pod}) and (\ref{KE_rotors}):
         \begin{equation}
             \label{KE_vtol}
             \begin{split}
@@ -220,7 +214,7 @@
                 - (f_r + f_l) \sin \theta \\ (f_r + f_l) \cos \theta \\ (fr - f_l) d
             \end{pmatrix}\]
 
-            \item Using the kinetic and the potential energies (eq. \ref{KE_vtol} and eq. \ref{PE_vtol}) we can write the Lagrangian as:
+            \item Using the kinetic and the potential energies (\ref{KE_vtol}) and (\ref{PE_vtol}) we can write the Lagrangian as:
             \[
                 \begin{split}
                     \mathcal{L} & = K_V - P_V = \frac12 M_V (\dot z_v^2 + \dot h^2 - 2gh) + \frac12 J_V \dot\theta^2
@@ -262,11 +256,178 @@
                     \begin{pmatrix}
                         M_V\ddot z_v \\ M_V \ddot h \\ J_V \ddot\theta
                     \end{pmatrix} = \begin{pmatrix}
-                        \mu \dot z_v - F \sin \theta \\ M_V g + F \cos \theta \\ \tau
+                        - \mu \dot z_v - F \sin \theta \\ - M_V g + F \cos \theta \\ \tau
                     \end{pmatrix}
                 }
             \end{equation}
         \end{enumerate}
     \end{Objective}
+
+    \pagebreak
+
+    \begin{Objective}{Linearize Equations of Motion}
+        \begin{enumerate}[(a)]
+            \item First we determine the equilibrium points of the equations of motion (\ref{EOM_vtol}) of the VTOL. At this point there is no motion in the system. This means:
+            \[\mathbf{\dot q} = \begin{pmatrix}
+                \dot z_v \\ \dot h \\ \dot \theta
+            \end{pmatrix} = \begin{pmatrix}
+                0 \\ 0 \\ 0
+            \end{pmatrix}\]
+
+            And consequently,
+            \[\mathbf{\ddot q} = 0 \implies \begin{pmatrix}
+                M_V\ddot z_v \\ M_V \ddot h \\ J_V \ddot\theta
+            \end{pmatrix} = 0\]
+
+            \[ \begin{pmatrix}
+                - \mu \dot z_v - F \sin \theta \\ M_V g + F \cos \theta \\ \tau
+            \end{pmatrix} = 0 \implies \begin{pmatrix}
+                - F \sin \theta \\ - M_V g + F \cos \theta \\ \tau
+            \end{pmatrix} = 0\]
+
+            The solutions of the above equations are given by, $\theta_e = 0$ or $\theta_e = \pi$ and due to this $F_e =  M_V g$ or $F_2 = -M_V g$ and $\tau_e = 0$. The values of $z_e$ and $h_e$ can be anything.
+            
+            But taking the practical consideration that the rotors are able to rotate in only one direction the case where $\theta = \pi$ and $F_e = - M_V g$, the rotors can not generate a positive force in the opposite direction of the direction of lift. So, we will drop this case.
+
+            \item In order to linearize the equations, we first write the equations seperately in the form:
+            \[\begin{split}
+                \ddot z_v & = - \frac{\mu}{M_V}\dot z_v - \frac{F}{M_V} \sin\theta\\
+                \ddot h & = - g + \frac{F}{M_V}\cos \theta \\
+                \ddot \theta & = \frac{1}{J_c}\tau
+            \end{split}\]
+
+            Now, we define:
+            \[
+                \tilde{z}_v \equiv z_v - z_v^{(e)},\ \tilde{h} \equiv h - h_e,\ \tilde{\theta} \equiv \theta - \theta_e,\ \tilde F \equiv F - F_e,\ \tilde \tau \equiv \tau - \tau_e = \tau
+            \]
+
+            Also, we can note that as $\mathbf{\dot q}_e = 0$ and $\mathbf{\ddot q}_e = 0$, so we can write:
+            \[\dot{\tilde z}_v = \dot z_v,\ \ddot{\tilde z}_v = \ddot z_v\]
+            \[\dot{\tilde h} = \dot h,\ \ddot{\tilde h} = \ddot h\] 
+            \[\dot{\tilde \theta} = \dot \theta,\ \ddot{\tilde \theta} = \ddot \theta\]
+
+            Now we linearize the non-linear terms in these equations as follows:
+            \[
+                \begin{split}
+                    \frac{\mu}{M_V}\dot z_v & \approx \frac{\mu}{M_V}\dot z_v^{(e)} + \pde{}{\dot z_v}(\frac{\mu}{M_V}\dot z_v) \bigg\rvert_{eq.} (\dot z_v - \dot z_v^{(e)}) \\
+                    & = \frac{\mu}{M_V}\dot{\tilde z}_v \\
+                    \frac{F}{M_V} \sin\theta & \approx \frac{F}{M_V} \sin\theta_e + \pde{}{\theta}(\frac{F}{M_V} \sin\theta) \bigg\rvert_{eq.} (\theta - \theta_e) \\
+                    & = \frac{F_e}{M_V} \tilde\theta\cos\theta_e \\
+                    & = g \tilde\theta \\
+                    \frac{F}{M_V} \cos\theta & \approx \frac{F}{M_V} \cos\theta_e + \pde{}{\theta}(\frac{F}{M_V} \cos\theta) \bigg\rvert_{eq.} (\theta - \theta_e) \\
+                    & = \frac{F}{M_V} +  \frac{F_e}{M_V}\tilde\theta\sin\theta_e \\
+                    & = \frac{F}{M_V} \\
+                    & = \frac{\tilde F}{M_V} + g
+                \end{split}
+            \]
+
+            So, the linearized equations of motion are:
+            \begin{equation}
+                \label{EOM_vtol_linear}
+                \begin{split}
+                    \ddot{\tilde z}_v & = - \frac{\mu}{M_V}\dot{\tilde z}_v - g\tilde\theta \\
+                    \ddot{\tilde h} & = \frac{\tilde F}{M_V}\\
+                    \ddot{\tilde\theta} & = \frac{1}{J_c}\tilde\tau
+                \end{split}
+            \end{equation}
+
+            \item The equations of motion can only be feedback linearized if we can write the equations in the from given below where $y(t)$ is the output and $u(t)$ is the input with the function $g(y, \dot y)$ giving the non-linear terms.
+            \[a\ddot y + b\dot y + cy = g(y,\dot y) + u(t)\]
+
+            But in the case of the equations of motion of the planar VTOL given by (\ref{EOM_vtol}), the non-linerity is present in the input term itself ($F$ is the input), and hence we can't seperately define $g(y,\dot y)$. Hence, the system can not be feedback linearized. 
+
+        \end{enumerate}
+    \end{Objective}
+
+    \pagebreak
+
+    \begin{Objective}{Transfer Function Model}
+        \begin{enumerate}[(a)]
+            \item We have the linearized equations of motion given in (\ref{EOM_vtol_linear}). If we take the laplace transform of those equations we get the following:
+            \[\begin{split}
+                s^2 \tilde Z(s) & = - \frac{\mu}{M_V} s \tilde Z(s) - g\tilde \Theta(s) \\
+                s^2 \tilde H(s) & = \frac{1}{M_V} \tilde{F}(s) \\
+                s^2 \tilde \Theta(s) & = \frac{1}{J_c} \tilde{\tau}(s)
+            \end{split}\]
+
+            \item For longitudinal dynamics we have the following equation:
+            \[ 
+                \begin{split}
+                    & s^2 \tilde H(s) = \frac{1}{M_V} \tilde{F}(s) \\
+                    \implies &  \boxed{\tilde H(s) = \frac{1}{s^2 M_V} \tilde{F}(s)}
+                \end{split}
+            \]
+
+            Hence, in the longitudinal dynamics we have $\tilde F(s)$ as the input variable and $\tilde H(s)$ as the output with transfer function $\frac{1}{s^2 M_V}$.
+
+            \item For lateral dynamics first we have the equation for $\tilde \Theta (s)$:
+            \[
+                \begin{split}
+                    & s^2 \tilde \Theta(s) = \frac{1}{J_c} \tilde{\tau}(s) \\
+                    \implies & \boxed{\tilde\Theta(s) = \frac{1}{s^2 J_c} \tilde{\tau}(s)}
+                \end{split}  
+            \]
+
+            And, also we have the equation for $\tilde Z(s)$ given by:
+            \[
+                \begin{split}
+                    & s^2 \tilde Z(s) = - \frac{\mu}{M_V} s \tilde Z(s) - g\tilde \Theta(s) \\
+                    \implies & \tilde Z(s) + \frac{\mu}{s M_V}\tilde Z(s) = - \frac{g}{s^4 J_c} \tilde{\tau}(s) \\
+                    \implies & \tilde Z(s) = - \frac{\frac{g}{s^4 J_c} \tilde{\tau}(s)}{1 + \frac{\mu}{s M_V}} \\
+                    \implies & \boxed{\tilde Z(s) = - \frac{M_V g}{s^3 J_c (sM_V + \mu)}\tilde\tau(s)}
+                \end{split}    
+            \]
+
+            Hence, in the lateral dynamics we have $\tilde{\tau}(s)$ is the input variable, $\tilde{\Theta}(s)$ is the intermediate variable with transfer function \( \frac{1}{s^2 J_c} \) and $\tilde{Z}(s)$ is the output variable with transfer function \(- \frac{M_V g}{s^3 J_c (sM_V + \mu)}\).
+
+            \item The block diagrams of open loop longitudinal and lateral systems are:
+            
+            \vspace{0.5in}
+
+            \begin{figure}[H]
+                \centering
+                \begin{tikzpicture}[node distance=2.5cm,auto, > = latex']
+                    \node [int] (a) {$\cfrac{1}{s^2 M_V}$};
+                    \node (b) [left of=a,node distance=4cm, coordinate] {$\tilde F(s)$};
+                    \node (c) [right of=a,node distance=4cm, coordinate] {$\tilde H(s)$};
+                    \node [coordinate] (end) [right of=c, node distance=4cm]{};
+                    \path[->] (b) edge node {$\tilde F(s)$} (a);
+                    \path[->] (a) edge node {$\tilde H(s)$} (c);
+                \end{tikzpicture}
+                \caption{Longitudinal open loop system}
+                \label{fig:long_ol_diagram}
+            \end{figure}
+
+            \vspace{0.5in}
+
+            \begin{figure}[H]
+                \centering
+                \begin{tikzpicture}[node distance=2.5cm,auto, > = latex']
+                    \node [int, minimum size=4em] (a) {$\cfrac{1}{s^2 J_c}$};
+                    \node (b) [left of=a,node distance=3cm, coordinate] {$\tilde \tau(s)$};
+                    \node [right of=a, minimum size=2.5em, node distance=5cm, int] (c) {$- \cfrac{M_V g}{s^3 J_c (sM_V + \mu)}$};
+                    \node [coordinate] (end) [right of=c, node distance=4cm]{};
+                    \path[->] (b) edge node {$\tilde \tau(s)$} (a);
+                    \path[->] (a) edge node {$\tilde \Theta(s)$} (c);
+                    \path[->] (c) edge node {$\tilde Z(s)$} (end);
+                \end{tikzpicture}
+                \caption{Lateral open loop system}
+                \label{fig: lat_ol_diagram}
+            \end{figure}
+        \end{enumerate}
+        
+    \end{Objective}
+
+    \pagebreak
+
+    \begin{Objective}{State Space Model}
+        
+    \end{Objective}
+
+    \pagebreak
+
+    \begin{thebibliography}{1}
+        \bibitem{controlbook} Randal W Beard, Timothy W. McLain, Cammy Peterson, Marc Killpack (2021), ``Introduction to Feedback Control using Design Studies'', \url{http://controlbook.byu.edu/doku.php}
+    \end{thebibliography}
 
 \end{document}
