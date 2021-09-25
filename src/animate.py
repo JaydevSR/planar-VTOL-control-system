@@ -8,22 +8,29 @@ import parameters as par
 class Animation:
     def __init__(self, timedelta=0.05) -> None:
         self.fig, self.ax = plt.subplots()
+        self.ax.set_ymargin(0)
+        self.scatter = self.ax.plot([], [])
         self.init = True
         self.timedelta = timedelta
+        self.history = dict()
 
-    def draw_figure(self, h, z_v, theta, z_t) -> None:
-        self.draw_VTOL(h, z_v, theta, z_t)
-        x_range = (min(z_v, z_t)-1, max(z_t, z_v)+1)
-        y_range = (0, h+1)
-        window_side = max(abs(x_range[0] - x_range[1]),
-                          abs(y_range[0] - y_range[1]))
-        x_padding = 0.5*(window_side - abs(x_range[0] - x_range[1]))
-        self.ax.set_xlim(x_range[0] - x_padding, x_range[1] + x_padding)
-        self.ax.set_ylim(0, window_side)
+    def draw_figure(self, z, h, theta, z_t) -> None:
+        self.draw_VTOL(h, z, theta, z_t)
+        self.scatter[0].set_xdata(self.history['z'])
+        self.scatter[0].set_ydata(self.history['h'])
+        # x_range = (min(z, z_t)-1, max(z_t, z)+1)
+        # y_range = (0, h+1)
+        # window_side = max(abs(x_range[0] - x_range[1]),
+        #                   abs(y_range[0] - y_range[1]))
+        # x_padding = 0.5*(window_side - abs(x_range[0] - x_range[1]))
+        # self.ax.set_xlim(x_range[0] - x_padding, x_range[1] + x_padding)
+        # self.ax.set_ylim(0, window_side)
+        self.ax.relim()
+        self.ax.autoscale_view()
         plt.show()
         plt.pause(self.timedelta)
 
-    def draw_VTOL(self, h, z, theta, z_t):
+    def draw_VTOL(self, z, h, theta, z_t):
         # centers of the rotors
         rot1 = (z - par.d * np.cos(theta), h - par.d * np.sin(theta))
         rot2 = (z + par.d * np.cos(theta), h + par.d * np.sin(theta))
@@ -36,6 +43,8 @@ class Animation:
         tar = (z_t - par.side_tar / 2, 0)
 
         if self.init:
+            self.history["z"] = [z]
+            self.history["h"] = [h]
             self.body = patch.Rectangle(bod, par.side_bod, par.side_bod,
                                         facecolor='black')
             self.rotor1 = patch.Ellipse(rot1, par.rad_rot*2.5, par.rad_rot,
@@ -54,6 +63,8 @@ class Animation:
             self.ax.add_patch(self.target)
             self.init = False
         else:
+            self.history["z"].append(z)
+            self.history["h"].append(h)
             self.target.set_xy(tar)
             self.body.set_xy(bod)
             self.body.angle = np.rad2deg(theta)

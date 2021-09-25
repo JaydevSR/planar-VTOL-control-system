@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 
 \usepackage{fancyhdr}
 \usepackage{extramarks}
@@ -298,23 +298,23 @@
 
             Now, we define:
             \[
-                \tilde{z}_v \equiv z_v - z_v^{(e)},\ \tilde{h} \equiv h - h_e,\ \tilde{\theta} \equiv \theta - \theta_e,\ \tilde F \equiv F - F_e,\ \tilde \tau \equiv \tau - \tau_e = \tau
+                \tilde{z} \equiv z_v - z_v^{(e)},\ \tilde{h} \equiv h - h_e,\ \tilde{\theta} \equiv \theta - \theta_e,\ \tilde F \equiv F - F_e,\ \tilde \tau \equiv \tau - \tau_e = \tau
             \]
 
             Also, we can note that as $\mathbf{\dot q}_e = 0$ and $\mathbf{\ddot q}_e = 0$, so we can write:
-            \[\dot{\tilde z}_v = \dot z_v,\ \ddot{\tilde z}_v = \ddot z_v\]
+            \[\dot{\tilde z} = \dot z_v,\ \ddot{\tilde z} = \ddot z_v\]
             \[\dot{\tilde h} = \dot h,\ \ddot{\tilde h} = \ddot h\] 
             \[\dot{\tilde \theta} = \dot \theta,\ \ddot{\tilde \theta} = \ddot \theta\]
 
             Now we linearize the non-linear terms in these equations as follows:
             \[
                 \begin{split}
-                    \frac{\mu}{M_V}\dot z_v & \approx \frac{\mu}{M_V}\dot z_v^{(e)} + \pde{}{\dot z_v}(\frac{\mu}{M_V}\dot z_v) \bigg\rvert_{eq.} (\dot z_v - \dot z_v^{(e)}) \\
-                    & = \frac{\mu}{M_V}\dot{\tilde z}_v \\
-                    \frac{F}{M_V} \sin\theta & \approx \frac{F}{M_V} \sin\theta_e + \pde{}{\theta}(\frac{F}{M_V} \sin\theta) \bigg\rvert_{eq.} (\theta - \theta_e) \\
+                    \frac{\mu}{M_V}\dot z_v & \approx \frac{\mu}{M_V}\dot z_v^{(e)} + \pde{}{\dot z_v}\bigg(\frac{\mu}{M_V}\dot z_v\bigg) \bigg\rvert_{eq.} (\dot z_v - \dot z_v^{(e)}) \\
+                    & = \frac{\mu}{M_V}\dot{\tilde z} \\
+                    \frac{F}{M_V} \sin\theta & \approx \frac{F}{M_V} \sin\theta_e + \pde{}{\theta}\bigg(\frac{F}{M_V} \sin\theta\bigg) \bigg\rvert_{eq.} (\theta - \theta_e) \\
                     & = \frac{F_e}{M_V} \tilde\theta\cos\theta_e \\
                     & = g \tilde\theta \\
-                    \frac{F}{M_V} \cos\theta & \approx \frac{F}{M_V} \cos\theta_e + \pde{}{\theta}(\frac{F}{M_V} \cos\theta) \bigg\rvert_{eq.} (\theta - \theta_e) \\
+                    \frac{F}{M_V} \cos\theta & \approx \frac{F}{M_V} \cos\theta_e + \pde{}{\theta}\bigg(\frac{F}{M_V} \cos\theta\bigg) \bigg\rvert_{eq.} (\theta - \theta_e) \\
                     & = \frac{F}{M_V} +  \frac{F_e}{M_V}\tilde\theta\sin\theta_e \\
                     & = \frac{F}{M_V} \\
                     & = \frac{\tilde F}{M_V} + g
@@ -325,7 +325,7 @@
             \begin{equation}
                 \label{EOM_vtol_linear}
                 \begin{split}
-                    \ddot{\tilde z}_v & = - \frac{\mu}{M_V}\dot{\tilde z}_v - g\tilde\theta \\
+                    \ddot{\tilde z} & = - \frac{\mu}{M_V}\dot{\tilde z} - g\tilde\theta \\
                     \ddot{\tilde h} & = \frac{\tilde F}{M_V}\\
                     \ddot{\tilde\theta} & = \frac{1}{J_c}\tilde\tau
                 \end{split}
@@ -380,6 +380,8 @@
 
             Hence, in the lateral dynamics we have $\tilde{\tau}(s)$ is the input variable, $\tilde{\Theta}(s)$ is the intermediate variable with transfer function \( \frac{1}{s^2 J_c} \) and $\tilde{Z}(s)$ is the output variable with transfer function \(- \frac{M_V g}{s^3 J_c (sM_V + \mu)}\).
 
+            \pagebreak
+
             \item The block diagrams of open loop longitudinal and lateral systems are:
             
             \vspace{0.5in}
@@ -421,7 +423,79 @@
     \pagebreak
 
     \begin{Objective}{State Space Model}
-        
+        \begin{enumerate}[(a)]
+            \item For the longitudinal dynamics we define the state of the system as \( \tilde x_{lon} = \begin{pmatrix} \tilde h & \dot{\tilde h} \end{pmatrix}^{\mathrm T}\), the input as \(\tilde u_{lon} = \tilde F\) and the output as \(\tilde y_{lon} = \tilde h\). Now we can write:
+            \[
+                \begin{split}
+                    & \dot{\tilde x}_{lon} = \begin{pmatrix}
+                        \dot{\tilde{h}} \\ \ddot{\tilde{h}}
+                    \end{pmatrix} = \begin{pmatrix}
+                        \dot{\tilde{h}} \\ \frac{\tilde F}{M_V}
+                    \end{pmatrix} \\
+                    \implies & \dot{\tilde x}_{lon} = \begin{pmatrix}
+                        \dot{\tilde{h}} \\ \frac{\tilde u_{lon}}{M_V}
+                    \end{pmatrix} = \begin{pmatrix}
+                        0 & 1 \\ 0 & 0
+                    \end{pmatrix} \begin{pmatrix}
+                        \tilde h \\ \dot{\tilde{h}}
+                    \end{pmatrix} + \begin{pmatrix}
+                        0 \\ \frac1{M_V}
+                    \end{pmatrix} \tilde{u}_{lon} \\
+                    \implies & \dot{\tilde x}_{lon} = A \tilde x_{lon} + B \tilde{u}_{lon} \\
+                \end{split}
+            \]
+
+            Similary for the output we have:
+            \[
+                \begin{split}
+                    & \tilde y_{lon} = \tilde h \\
+                    \implies & \tilde y_{lon} = \begin{pmatrix} 1 & 0 \end{pmatrix} \begin{pmatrix}
+                    \tilde h \\ \dot{\tilde h} \end{pmatrix} + \begin{pmatrix} 0 \end{pmatrix} \tilde{u}_{lon} \\
+                    \implies & \tilde y_{lon} = C \tilde x_{lon} + D \tilde u_{lon}
+                \end{split}  
+            \]
+
+            \item For the lateral dynamics we define the state as \(\tilde x_{lat} = \begin{pmatrix}
+                \tilde z & \tilde\theta & \dot{\tilde z} & \dot{\tilde \theta}
+            \end{pmatrix}^{\mathrm T}\) with the input \(\tilde u_{lat} = \tilde{\tau}\) and output \(\tilde y_{lat} = \begin{pmatrix} \tilde z & \tilde \theta \end{pmatrix}^{\mathrm T}\). So for this we have:
+
+            \[
+                \begin{split}
+                    & \dot{\tilde{x}}_{lat} = \begin{pmatrix}
+                        \dot{\tilde z} \\ \dot{\tilde\theta} \\ \ddot{\tilde z} \\ \ddot{\tilde \theta}
+                    \end{pmatrix} = \begin{pmatrix}
+                        \dot{\tilde z} \\ \dot{\tilde\theta} \\ - \frac{\mu}{M_V}\dot{\tilde z} - g\tilde\theta \\ \frac{1}{J_c}\tilde\tau
+                    \end{pmatrix} \\
+                    \implies & \dot{\tilde{x}}_{lat} = \begin{pmatrix}
+                        0 & 0 & 1 & 0 \\
+                        0 & 0 & 0 & 1 \\
+                        0 & - g & - \frac{\mu}{M_V} & 0 \\
+                        0 & 0 & 0 & 0
+                    \end{pmatrix} \begin{pmatrix}
+                        \tilde z \\ \tilde\theta \\ \dot{\tilde z} \\ \dot{\tilde \theta}
+                    \end{pmatrix} + \begin{pmatrix}
+                        0 \\ 0 \\ 0 \\ \frac{1}{J_c}
+                    \end{pmatrix} \tilde{\tau} \\
+                    \implies & \dot{\tilde{x}}_{lat} = A \tilde{x}_{lat} + B \tilde{u}_{lat}
+                \end{split}    
+            \]
+
+            Similary, for the output we have:
+
+            \[\begin{split}
+                & \tilde y_{lat} = \begin{pmatrix}
+                    \tilde z \\ \tilde \theta
+                \end{pmatrix} = \begin{pmatrix}
+                    1 & 0 & 0 & 0 \\
+                    0 & 1 & 0 & 0
+                \end{pmatrix} \begin{pmatrix}
+                    \tilde z \\ \tilde\theta \\ \dot{\tilde z} \\ \dot{\tilde \theta}
+                \end{pmatrix} + \begin{pmatrix}
+                    0
+                \end{pmatrix} \tilde \tau \\
+                \implies & \tilde y_{lat} = C \tilde{x}_{lat} + D \tilde{u}_{lat}
+            \end{split}\]
+        \end{enumerate}
     \end{Objective}
 
     \pagebreak
