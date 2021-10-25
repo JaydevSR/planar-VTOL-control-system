@@ -32,6 +32,16 @@ class VTOL(Plant):
             tau / self.J
         ])
         return qddot
+    
+    def eom_linear(self, q, qdot, F, tau):
+        tht = q[2]
+        zdot = qdot[0]
+        qddot = np.array([
+            - (P.mu / self.M) * zdot - (P.g) * tht,
+            F / self.M,
+            tau / self.J
+        ])
+        return qddot
 
     def state(self):
         return np.array([
@@ -42,7 +52,7 @@ class VTOL(Plant):
     def statedot(self, state, F, tau):
         q = state[:3]
         qdot = state[3:]
-        qddot = self.eom(q, qdot, F, tau)
+        qddot = self.eom_linear(q, qdot, F, tau)
         return np.array([
             qdot[0], qdot[1], qdot[2],
             qddot[0], qddot[1], qddot[2]

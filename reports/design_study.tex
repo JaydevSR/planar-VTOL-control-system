@@ -407,7 +407,7 @@
                 \begin{tikzpicture}[node distance=2.5cm,auto, > = latex']
                     \node [int, minimum size=4em] (a) {$\cfrac{1}{s^2 J_c}$};
                     \node (b) [left of=a,node distance=3cm, coordinate] {$\tilde \tau(s)$};
-                    \node [right of=a, minimum size=2.5em, node distance=5cm, int] (c) {$- \cfrac{M_V g}{s^3 J_c (sM_V + \mu)}$};
+                    \node [right of=a, minimum size=2.5em, node distance=5cm, int] (c) {$- \cfrac{M_V g}{s J_c(sM_V + \mu)}$};
                     \node [coordinate] (end) [right of=c, node distance=4cm]{};
                     \path[->] (b) edge node {$\tilde \tau(s)$} (a);
                     \path[->] (a) edge node {$\tilde \Theta(s)$} (c);
@@ -498,6 +498,225 @@
         \end{enumerate}
     \end{Objective}
 
+
+    \begin{Objective}{Pole Placement using PD}
+        \begin{enumerate}[(a)]
+            \item The open loop transfer function from $\tilde F(s)$ to $\tilde H(s)$ is given by:
+            \[\tilde H(s) = \frac{1}{s^2 M_V} \tilde F(s)\]
+            So, the open loop poles can be written as the roots of the equation:
+            \[\Delta_{ol} = s^2 M_V\]
+            That is $p_{ol} = 0$
+
+            \item Using the figure referred to in the problem we can write the closed loop transfer function equation from $\tilde h_r$ to $\tilde h$ as:
+            \[\tilde H(s) =\biggl(\frac{1}{s^2 M_V}\biggr)(k_p (\tilde H_r(s) - \tilde H(s)) - k_D s \tilde H(s))\]
+
+            \[\implies \tilde H(s) = \frac{\frac{k_p}{M_V}}{s^2 + \frac{k_D}{M_V}s + \frac{k_P}{M_V}} \tilde H_r(s)\]
+
+            Hence, the closed loop poles are given by the roots of the equation:
+            \[ \Delta_{cl} = s^2 + \frac{k_D}{M_V}s + \frac{k_P}{M_V}\]
+
+            That is:
+            \[ p_{cl} = - \frac{k_D}{2 M_V} \pm \sqrt{\biggl(\frac{k_D}{2 M_V}\biggr)^2 - \frac{k_P}{M_V}}\]
+
+            \item The desired closed loop poles are at $p=-0.2$ and $p=-0.3$. So, the characteristic polynomial of the desired poles will be:
+            \[ \Delta_{cl}^d = (s+0.2)(s+0.3)\]
+
+            Equating with the closed loop characteristic equation we have:
+            \[s^2 + 0.5s + 0.06 = s^2 + \frac{k_D}{M_V}s + \frac{k_P}{M_V}\]
+            \[\implies \frac{k_D}{M_V} = 0.5 \ \text{and} \ \frac{k_P}{M_V} = 0.06\]
+            \[\implies k_D = 0.5 M_V \ \text{and} \ k_P = 0.06 M_V\]
+
+            \item The response for longitudinal dynamics is given below:
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=\linewidth]{plots/step_response_F7.png}
+                \caption{Step Response for Longitudinal Controller}
+            \end{figure}
+        \end{enumerate}
+        
+    \end{Objective}
+
+    \begin{Objective}{Successive Loop Closure}
+        \begin{enumerate}[(a)]
+            \item Given that the rise time is given by $t_r = 8$ seconds. The the natural frequency of is:
+            \[\omega_n = \frac{\pi}{2 t_r \sqrt{1 - \zeta^2}} \approx \frac{2.2}{t_r} \hspace{0.5in} \text{(For $\zeta = 0.707$)}\]
+            \[\implies \omega_n = 0.275\]
+
+            So, the desired closed loop characteristic polynomial is:
+            \[\Delta_{cl}^d = s^2 + 2 \zeta \omega_n s + \omega_n^2 = s^2 + 0.194425 s + 0.075625\]
+
+            Equating with the closed loop characteristic polynomial we get:
+            \[k_{D_h} = 0.194425 M_V \ \text{and} \ k_{P_h} = 0.075625 M_V\]
+
+            \item For the inner loop in which we use $\tilde \tau$ to regulate $\tilde \theta$ we have the following transfer function equation using the transfer function of $\tilde \tau (s)$ to $\tilde \theta (s)$:
+            \[\tilde \Theta (s) = \frac{1}{s^2 J_c} (k_p (\tilde \Theta_r (s) - \tilde \Theta (s)) - s k_D \tilde \Theta (s))\]
+
+            \[\implies \tilde{\Theta} (s) = \frac{\frac{k_P}{J_c}}{s^2 + \frac{k_D}{J_c} s + \frac{k_P}{J_c}} \tilde \Theta_r (s)\]
+            
+            So, the closed loop characteristic polynomial for roll angle is:
+
+            \[\Delta_{cl, \theta} = s^2 + \frac{k_D}{J_c} s + \frac{k_P}{J_c}\]
+
+            Now, given the rise time of $t_{r\theta} = 0.8$ seconds and damping of $\zeta_z = 0.707$ we have that the natural frequency is $\omega_{n\theta} = \frac{2.2}{t_{r\theta}} = 2.75$.
+
+            Then the desired characteristic polynomial for roll angle is:
+            \[\Delta_{cl, \theta}^d = s^2 + 2 \zeta \omega_{n\theta} s + \omega_{n\theta}^2 = s^2 + 3.8885 s + 7.5625\]
+
+            Comparing this equation with the closed loop characteristic polynomial we have:
+            \[k_{D\theta} = 3.8885 J_c \ \text{and} \ k_{P\theta} = 7.5625 J_c\]
+
+            \item The DC gain of the inner loop is given by:
+            \[k_{DC_\theta} = \lim_{s \rightarrow 0} \frac{\frac{k_P}{J_c}}{s^2 + \frac{k_D}{J_c} s + \frac{k_P}{J_c}} = 1 \]
+
+            \item As the DC gain of the inner loop system is just 1, so the transfer function equation of the outer loop system will be given by:
+            \[\tilde Z(s) = \frac{- M_Vg}{s^2 M_V + s \mu}(k_P (\tilde Z_r(s) - \tilde Z(s)) - sk_D \tilde Z(s))\]
+            Rearranging this equation we get:
+            \[ \tilde Z (s) = \frac{- g k_P}{s^2 + (\frac{\mu}{M_V} - g k_D)s + -g k_P} \tilde Z_r (s) \]
+
+            Hence, the close loop characteristic polynomial of $\tilde z$ will be:
+            \[\Delta_{cl, z} = s^2 + (\frac{\mu}{M_V} - g k_D)s - g k_P\]
+
+            Now, given the rise time of $t_{rz} = 10t_{r\theta} = 8$ seconds and damping of $\zeta_z = 0.707$ we have that the natural frequency is $\omega_{nz} = \frac{2.2}{t_{rz}} = 0.275 \ \text{s}^{-1}$.
+
+            Then the desired characteristic polynomial for translation is:
+            \[\Delta_{cl, z}^d = s^2 + 2 \zeta_z \omega_{nz} s + \omega_{nz}^2 = s^2 + 0.38885 s + 0.075625\]
+
+            Comparing this equation with the closed loop characteristic polynomial we have:
+            \[k_{D_z} = \frac{1}{g}\biggl(\frac{\mu}{M_V} - 0.38885\biggr) \ \text{and} \ k_{P_z} = \frac{-0.075625}{g}\]
+
+            \item See code for the implementation. The respose is given in the following plot:
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=\linewidth]{plots/square_response_F8.png}
+                \caption{Square Response for Lateral Controller}
+            \end{figure}
+            
+            \item We are given the saturation limits: $0 \le f_l \le 10 \text N$ and $0 \le f_r \le 10 \text N$. So, as $\tau = d*(f_r - f_l)$ and $F = f_r + f_l$. So, $F_{max} = 20 \ \text N$ and $\tau_{max} = 10d \ \text{Nm}$. 
+        \end{enumerate}
+    \end{Objective}
+
+    \begin{Objective}{Integrators and System Type}
+        \begin{enumerate}[(a)]
+            \item For the longitudinal dynamics, we have that the error term $e_h(t)$ with the reference input $h^d(t)$ in the transfer model can be written as:
+            \[E_h(s) = \frac{1}{1 + \frac{sk_{D_h} + k_{P_h}}{s^2M_V}} H^d(s)\]
+
+            Now, for step input, we have $H^d(s) = \frac1s$. So, the steady state error is given by:
+            \begin{equation*}
+                \begin{split}
+                    \lim_{t \rightarrow \infty} e_h(t) &= \lim_{s\rightarrow 0} sE_h(s) \\
+                    &= \lim_{s\rightarrow 0} s \frac{1}{1 + \frac{sk_{D_h} + k_{P_h}}{s^2M_V}} \frac{1}{s} \\
+                    &= \frac{1}{1 + \lim_{s \rightarrow 0} \frac{sk_{D_h} + k_{P_h}}{s^2M_V}} \\
+                    &= 0
+                \end{split}
+            \end{equation*}
+
+            For ramp input, we have $H^d(s) = \frac1{s^2}$. So, the steady state error is given by:
+            \begin{equation*}
+                \begin{split}
+                    \lim_{t \rightarrow \infty} e_h(t) &= \lim_{s\rightarrow 0} sE_h(s) \\
+                    &= \lim_{s\rightarrow 0} s \frac{1}{1 + \frac{sk_{D_h} + k_{P_h}}{s^2M_V}} \frac{1}{s^2} \\
+                    &= \lim_{s\rightarrow 0} \frac{1}{s + \frac{s^2k_{D_h} + sk_{P_h}}{s^2M_V}} \\
+                    &= \frac{1}{\lim_{s\rightarrow 0}\frac{s^2k_{D_h} + sk_{P_h}}{s^2M_V}} \\
+                    & = 0
+                \end{split}
+            \end{equation*}
+
+            For parabolic response, we have $H^d(s) = \frac1{s^3}$. So, the steady state error is given by:
+            \begin{equation*}
+                \begin{split}
+                    \lim_{t \rightarrow \infty} e(t) &= \lim_{s\rightarrow 0} sE(s) \\
+                    &= \lim_{s\rightarrow 0} s \frac{1}{1 + \frac{sk_{D_h} + k_{P_h}}{s^2M_V}} \frac{1}{s^3} \\
+                    &= \lim_{s\rightarrow 0} \frac{1}{s^2 + \frac{s^3k_{D_h} + s^2k_{P_h}}{s^2M_V}} \\
+                    &= \frac{1}{\lim_{s\rightarrow 0}\frac{s^3k_{D_h} + s^2k_{P_h}}{s^2M_V}} \\
+                    & = \frac{M_V}{k_{P_h}}
+                \end{split}
+            \end{equation*}
+
+            As the steady state error in the parabolic input of type $H^d(s) = \frac{1}{s^3}$ is finite so, we have that the system is a \textit{type 2 system}.
+
+            \item For the inner loop lateral dynamics, we have that the error term $e_\theta(t)$ with the reference input $\theta^d(t)$ in the transfer model can be written as:
+            \[E_\theta(s) = \frac{1}{1 + \frac{sk_{D_\theta} + k_{P_\theta}}{s^2J_c}} \Theta^d(s)\]
+
+            Now, for step response, we have $\Theta^d(s) = \frac1s$. So, the steady state error is given by:
+            \begin{equation*}
+                \begin{split}
+                    \lim_{t \rightarrow \infty} e_\theta(t) &= \lim_{s\rightarrow 0} sE_\theta(s) \\
+                    &= \lim_{s\rightarrow 0} s \frac{1}{1 + \frac{sk_{D_\theta} + k_{P_\theta}}{s^2J_c}} \frac{1}{s} \\
+                    &= \frac{1}{1 + \lim_{s \rightarrow 0} \frac{sk_{D_\theta} + k_{P_\theta}}{s^2J_c}} \\
+                    &= 0
+                \end{split}
+            \end{equation*}
+
+            For ramp response, we have $\Theta^d(s) = \frac1{s^2}$. So, the steady state error is given by:
+            \begin{equation*}
+                \begin{split}
+                    \lim_{t \rightarrow \infty} e_\theta(t) &= \lim_{s\rightarrow 0} sE_\theta(s) \\
+                    &= \lim_{s\rightarrow 0} s \frac{1}{1 + \frac{sk_{D_\theta} + k_{P_\theta}}{s^2J_c}} \frac{1}{s^2} \\
+                    &= \lim_{s\rightarrow 0} \frac{1}{s + \frac{s^2k_{D_\theta} + sk_{P_\theta}}{s^2J_c}} \\
+                    &= \frac{1}{\lim_{s\rightarrow 0}\frac{s^2k_{D_\theta} + sk_{P_\theta}}{s^2J_c}} \\
+                    & = 0
+                \end{split}
+            \end{equation*}
+
+            For parabolic response, we have $\Theta^d(s) = \frac1{s^3}$. So, the steady state error is given by:
+            \begin{equation*}
+                \begin{split}
+                    \lim_{t \rightarrow \infty} e_\theta(t) &= \lim_{s\rightarrow 0} sE_\theta(s) \\
+                    &= \lim_{s \rightarrow 0} s \frac{1}{1 + \frac{sk_{D_\theta} + k_{P_\theta}}{s^2J_c}} \frac{1}{s^3} \\
+                    &= \lim_{s\rightarrow 0} \frac{1}{s^2 + \frac{s^3k_{D_\theta} + s^2k_{P_\theta}}{s^2J_c}} \\
+                    &= \frac{1}{\lim_{s\rightarrow 0}\frac{s^3k_{D_\theta} + s^2k_{P_\theta}}{s^2J_c}} \\
+                    & = \frac{J_c}{k_{P_\theta}}
+                \end{split}
+            \end{equation*}
+
+            As the steady state error in the parabolic input of type $\Theta^d(s) = \frac{1}{s^3}$ is finite so, we have that the system is a \textit{type 2 system}.
+
+            \item For the outer lateral dynamics, we have that the error term $e_z(t)$ with the reference input $z^d(t)$ in the transfer model can be written as:
+            \[E_z(s) = \frac{1}{1 - (sk_{D_z} + k_{P_z})\frac{M_V g}{s^3 J_c (sM_V + \mu)}} Z^d(s)\]
+
+            Now, for step response, we have $Z^d(s) = \frac1s$. So, the steady state error is given by:
+            \begin{equation*}
+                \begin{split}
+                    \lim_{t \rightarrow \infty} e_z(t) &= \lim_{s\rightarrow 0} sE_z(s) \\
+                    &= \lim_{s\rightarrow 0} s \frac{1}{1 - (sk_{D_z} + k_{P_z})\frac{M_V g}{s^3 J_c (sM_V + \mu)}} \frac{1}{s} \\
+                    &= \lim_{s\rightarrow 0}\frac{1}{1 - (sk_{D_z} + k_{P_z})\frac{M_V g}{s^3 J_c (sM_V + \mu)}}\\
+                    &= 0
+                \end{split}
+            \end{equation*}
+
+            For ramp response, we have $Z^d(s) = \frac1{s^2}$. So, the steady state error is given by:
+            \begin{equation*}
+                \begin{split}
+                    \lim_{t \rightarrow \infty} e_z(t) &= \lim_{s\rightarrow 0} sE_z(s) \\
+                    &= \lim_{s\rightarrow 0} s \frac{1}{1 - (sk_{D_z} + k_{P_z})\frac{M_V g}{s^3 J_c (sM_V + \mu)}} \frac{1}{s^2} \\
+                    &= \lim_{s\rightarrow 0}\frac{1}{s - (s^2k_{D_z} + sk_{P_z})\frac{M_V g}{s^3 J_c (sM_V + \mu)}}\\
+                    &= \frac{-1}{\lim_{s\rightarrow 0} (s^2k_{D_z} + sk_{P_z})\frac{M_V g}{s^3 J_c (sM_V + \mu)}}\\
+                    & = 0
+                \end{split}
+            \end{equation*}
+
+            For parabolic response, we have $Z^d(s) = \frac1{s^3}$. So, the steady state error is given by:
+            \begin{equation*}
+                \begin{split}
+                    \lim_{t \rightarrow \infty} e_z(t) &= \lim_{s\rightarrow 0} sE_z(s) \\
+                    &= \lim_{s\rightarrow 0} s \frac{1}{1 - (sk_{D_z} + k_{P_z})\frac{M_V g}{s^3 J_c (sM_V + \mu)}} \frac{1}{s^3} \\
+                    &= \lim_{s\rightarrow 0}\frac{1}{s^2 - (s^3k_{D_z} + s^2k_{P_z})\frac{M_V g}{s^3 J_c (sM_V + \mu)}}\\
+                    &= \frac{-1}{\lim_{s\rightarrow 0} (s^3k_{D_z} + s^2k_{P_z})\frac{M_V g}{s^3 J_c (sM_V + \mu)}}\\
+                    & = 0
+                \end{split}
+            \end{equation*}
+
+            Now we note that the steady state error in the input of type $Z^d(s) = \frac{1}{s^4}$ will be finite so, we have that the system is a \textit{type 3 system}.
+        \end{enumerate}
+    \end{Objective}
+
+    \begin{Objective}{PID Control}
+        \textit{The PID controller is implemented in the code files.}
+        \begin{enumerate}
+            \item \texttt{/src/parameters.py}
+            \item \texttt{/src/controller.py}
+        \end{enumerate}
+    \end{Objective}
     \pagebreak
 
     \begin{thebibliography}{1}
