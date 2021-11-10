@@ -32,15 +32,15 @@ class VTOL(Plant):
             tau / self.J
         ])
         return qddot
-    
+
     def eom_linear(self, q, qdot, F, tau):
         tht = q[2]
         zdot = qdot[0]
         qddot = np.array([
-            - (P.mu / self.M) * zdot - (P.g) * tht,
+            - (P.mu / self.M) * zdot - (P.g) * tht + (P.F_wind / self.M),
             F / self.M,
             tau / self.J
-        ])
+        ], dtype=float)
         return qddot
 
     def state(self):
@@ -56,7 +56,7 @@ class VTOL(Plant):
         return np.array([
             qdot[0], qdot[1], qdot[2],
             qddot[0], qddot[1], qddot[2]
-        ])
+        ], dtype=float)
 
     def update(self, state):
         self.history["z"].append(self.q[0])
@@ -74,7 +74,7 @@ class VTOL(Plant):
         k2 = self.statedot(state + 0.5 * self.delT * k1, F, tau)
         k3 = self.statedot(state + 0.5 * self.delT * k2, F, tau)
         k4 = self.statedot(state + self.delT * k3, F, tau)
-        state += (self.delT / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+        state += (self.delT / 6.0) * (1.0*k1 + 2.0 * k2 + 2.0 * k3 + 1.0*k4)
         return state
 
 

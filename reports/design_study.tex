@@ -857,15 +857,16 @@
             For \(C_{r, lat} = (1, 0, 0, 0)\) the feedforward reference gain for the lateral dynamics is given by:
             \[ k_{r, lat} = \cfrac{-1}{C_{r,lat} (A_{lat} - B_{lat} K_{lat})^{-1} B_{lat}} = -0.0021735\]
 
-            \item TODO
+            \item The required coding part is done in \texttt{/src/controller.py} and \texttt{/src/parameters.py}.
+            
+            To decrease the rise-time of the response we can increase the respective frequencies $\omega_n$. And in order to decrease the overshoot, we can increase the respective damping factor $\zeta$.
         \end{enumerate}
     \end{Objective}
 
     \begin{Objective}{Full State With Integrator}
         \begin{enumerate}[(a)]
-            \item TODO
-            \item TODO
-            \item TODO
+            \item Full state feedback with Integrator and anti-wind up is implemented in \texttt{/src/parameters.py} and \texttt{/src/controller.py}.
+            \item Variations in pararmeters and constant wind force are added in \texttt{/src/parameters.py} and \texttt{/src/plant.py}
         \end{enumerate}    
     \end{Objective}
 

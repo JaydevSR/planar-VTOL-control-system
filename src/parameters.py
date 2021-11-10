@@ -19,6 +19,9 @@ mu += 0.2 * mu * (2*np.random.rand() - 1)
 
 g = 9.81       # m s^-2
 
+F_wind = 0.1
+
+
 # For drawing
 rad_rot = d / 3
 side_bod = d / 2
@@ -34,7 +37,7 @@ kp_z = -0.075625 / g
 ki_z = 0.000007
 
 
-## FEEDBACK CONTROLLER GAINS
+# FEEDBACK CONTROLLER GAINS
 
 # tuning parameters
 wn_h = 0.275
@@ -46,7 +49,7 @@ zeta_h = zeta_z = zeta_tht = 0.707
 A_lat = np.array([
     [0, 0, 1, 0],
     [0, 0, 0, 1],
-    [0, -g, -mu / (Mc + Ml + Mr) , 0],
+    [0, -g, -mu / (Mc + Ml + Mr), 0],
     [0, 0, 0, 0]
 ])
 B_lat = np.array([
@@ -78,6 +81,23 @@ D_lon = np.array([
     [0]
 ])
 
+# Augmented matrices for lateral dynamics
+A_lat_1 = np.array([
+    [0, 0, 1, 0, 0],
+    [0, 0, 0, 1, 0],
+    [0, -g, -mu / (Mc + Ml + Mr), 0, 0],
+    [0, 0, 0, 0, 0],
+    [-1, 0, 0, 0, 0]
+])
+
+B_lat_1 = np.array([
+    [0],
+    [0],
+    [0],
+    [1 / Jc],
+    [0]
+])
+
 # gain calculations for longitudinal dynamics
 desired_char_poly_lon = [1, 2*zeta_h*wn_h, wn_h**2]
 desired_poles_lon = np.roots(desired_char_poly_lon)
@@ -91,14 +111,18 @@ else:
     print('kr_lon: ', kr_lon)
 
 # gain calculations for lateral dynamics
-desired_char_poly_lat = np.convolve([1, 2*zeta_z*wn_z, wn_z**2], [1, 2*zeta_tht*wn_tht, wn_tht**2])
+desired_char_poly_lat = np.convolve([1, 2*zeta_z*wn_z, wn_z**2],
+                                    [1, 2*zeta_tht*wn_tht, wn_tht**2])
 desired_poles_lat = np.roots(desired_char_poly_lat)
 
-if np.linalg.matrix_rank(cnt.ctrb(A_lat, B_lat)) != 4:
+if np.linalg.matrix_rank(cnt.ctrb(A_lat_1, B_lat_1)) != 5:
     print("Lateral dynamics not controllable!")
 else:
-    K_lat = cnt.acker(A_lat, B_lat, desired_poles_lat)
-    Cr_lat = np.array([1, 0, 0, 0])
-    kr_lat = -1.0 / (Cr_lat @ np.linalg.inv(A_lat - B_lat @ K_lat) @ B_lat)
+    K_lat_1 = cnt.acker(A_lat_1, B_lat_1, desired_poles_lat)
+    K_lat = np.matrix([K_lat_1.item(0), K_lat_1.item(1),
+                       K_lat_1.item(2), K_lat_1.item(3)])
+    # Cr_lat = np.array([1, 0, 0, 0])
+    # kr_lat = -1.0 / (Cr_lat @ np.linalg.inv(A_lat - B_lat @ K_lat) @ B_lat)
+    ki_lat = K_lat_1.item(4)
     print('K_lat: ', K_lat)
-    print('kr_lat: ', kr_lat)
+    print('ki_lat: ', ki_lat)

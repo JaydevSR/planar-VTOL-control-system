@@ -4,7 +4,7 @@ from plant import VTOL
 from animate import Animation
 from signals import SignalBox
 # import parameters as P
-from controller import VTOLcontroller
+from controller import PIDcontroller, FeedController
 
 tstart = 0.0
 tend = 40.0
@@ -13,7 +13,7 @@ tplot = 0.0001
 
 vtol = VTOL(0, 0, 0, tstep)
 # tar = Target(0)
-control = PIDcontroller(tstep)
+control = FeedController(tstep)
 anim = Animation(tplot)
 ref = SignalBox()
 ref2 = SignalBox(2.5, 0.08, 3)
@@ -22,9 +22,12 @@ plt.ion()
 t = tstart
 while (t < tend):
     h_r = ref.step(t)
-    z_r = ref2.step(t)
+    z_r = ref2.sin(t)
 
-    F, Tau = control.PIDupdate(z_r, h_r, vtol.q, vtol.qdot)
+    xlon = np.array([vtol.q[1], vtol.qdot[1]])
+    xlat = np.array([vtol.q[0], vtol.qdot[0], vtol.q[2], vtol.qdot[2]])
+
+    F, Tau = control.update(z_r, h_r, xlat, xlon)
     new_state = vtol.rk4_step(F, Tau)
     vtol.update(new_state)
     anim.draw_figure(vtol.q[0], vtol.q[1], vtol.q[2])
