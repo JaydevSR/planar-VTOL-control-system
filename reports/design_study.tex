@@ -543,10 +543,10 @@
             \[\implies \omega_n = 0.275\]
 
             So, the desired closed loop characteristic polynomial is:
-            \[\Delta_{cl}^d = s^2 + 2 \zeta \omega_n s + \omega_n^2 = s^2 + 0.194425 s + 0.075625\]
+            \[\Delta_{cl}^d = s^2 + 2 \zeta \omega_n s + \omega_n^2 = s^2 + 0.38885 s + 0.075625\]
 
             Equating with the closed loop characteristic polynomial we get:
-            \[k_{D_h} = 0.194425 M_V \ \text{and} \ k_{P_h} = 0.075625 M_V\]
+            \[k_{D_h} = 0.38885 M_V \ \text{and} \ k_{P_h} = 0.075625 M_V\]
 
             \item For the inner loop in which we use $\tilde \tau$ to regulate $\tilde \theta$ we have the following transfer function equation using the transfer function of $\tilde \tau (s)$ to $\tilde \theta (s)$:
             \[\tilde \Theta (s) = \frac{1}{s^2 J_c} (k_p (\tilde \Theta_r (s) - \tilde \Theta (s)) - s k_D \tilde \Theta (s))\]
@@ -617,7 +617,7 @@
                     &= \lim_{s\rightarrow 0} s \frac{1}{1 + \frac{sk_{D_h} + k_{P_h}}{s^2M_V}} \frac{1}{s^2} \\
                     &= \lim_{s\rightarrow 0} \frac{1}{s + \frac{s^2k_{D_h} + sk_{P_h}}{s^2M_V}} \\
                     &= \frac{1}{\lim_{s\rightarrow 0}\frac{s^2k_{D_h} + sk_{P_h}}{s^2M_V}} \\
-                    & = 0
+                    &= 0
                 \end{split}
             \end{equation*}
 
@@ -628,7 +628,7 @@
                     &= \lim_{s\rightarrow 0} s \frac{1}{1 + \frac{sk_{D_h} + k_{P_h}}{s^2M_V}} \frac{1}{s^3} \\
                     &= \lim_{s\rightarrow 0} \frac{1}{s^2 + \frac{s^3k_{D_h} + s^2k_{P_h}}{s^2M_V}} \\
                     &= \frac{1}{\lim_{s\rightarrow 0}\frac{s^3k_{D_h} + s^2k_{P_h}}{s^2M_V}} \\
-                    & = \frac{M_V}{k_{P_h}}
+                    &= \frac{M_V}{k_{P_h}}
                 \end{split}
             \end{equation*}
 
@@ -713,9 +713,197 @@
     \begin{Objective}{PID Control}
         \textit{The PID controller is implemented in the code files.}
         \begin{enumerate}
-            \item \texttt{/src/parameters.py}
-            \item \texttt{/src/controller.py}
+            \item Some random variations are added in the system parameters. (file: \texttt{/src/parameters.py})
+            \item The PID controller is implemented and the Integrator for lateral dynamics is tuned to $k_{I_z} = 0.000007$. (file: \texttt{/src/controller.py}). The steady state error for step response is given in the following plot.
+            \begin{figure}[H]
+                \centering
+                \includegraphics[width=0.7\linewidth]{plots/step_steady_state_err_F10.png}
+                \caption{Steady state error for step response}
+            \end{figure}
         \end{enumerate}
+    \end{Objective}
+
+    \begin{Objective}{Full State Feedback}
+        The state space equations for the longitudinal dynamics of the VTOL are given by (after replacing numerical values):
+
+        \[
+            \dot{\tilde x}_{lon} = \begin{pmatrix}
+                0 & 1 \\ 0 & 0
+            \end{pmatrix} \begin{pmatrix}
+                \tilde h \\ \dot{\tilde{h}}
+            \end{pmatrix} + \begin{pmatrix}
+                0 \\ 0.384615
+            \end{pmatrix} \tilde{u}_{lon}
+        \]
+        \[
+            \tilde y_{lon} = \begin{pmatrix} 1 & 0 \end{pmatrix} \begin{pmatrix} \tilde h \\ \dot{\tilde h} \end{pmatrix} + \begin{pmatrix} 0 \end{pmatrix} \tilde{u}_{lon}    
+        \]
+        Similary, for the lateral dynamics we have:
+        \[
+            \dot{\tilde{x}}_{lat} = \begin{pmatrix}
+                0 & 0 & 1 & 0 \\
+                0 & 0 & 0 & 1 \\
+                0 & -9.81 & -0.0808 & 0 \\
+                0 & 0 & 0 & 0
+            \end{pmatrix} \begin{pmatrix}
+                \tilde z \\ \tilde\theta \\ \dot{\tilde z} \\ \dot{\tilde \theta}
+            \end{pmatrix} + \begin{pmatrix}
+                0 \\ 0 \\ 0 \\ 111.111
+            \end{pmatrix} \tilde{\tau} \\
+        \]
+        \[
+            \tilde y_{lat} = \begin{pmatrix}
+                \tilde z \\ \tilde \theta
+            \end{pmatrix} = \begin{pmatrix}
+                1 & 0 & 0 & 0 \\
+                0 & 1 & 0 & 0
+            \end{pmatrix} \begin{pmatrix}
+                \tilde z \\ \tilde\theta \\ \dot{\tilde z} \\ \dot{\tilde \theta}
+            \end{pmatrix} + \begin{pmatrix}
+                0
+            \end{pmatrix} \tilde \tau
+        \]
+
+        \begin{enumerate}[(a)]
+            \item For longitudinal dynamics, the open loop characteristic polynomial is given by:
+            \[
+                \begin{aligned}
+                    \Delta_{ol, lon} &= det(sI - A_{lon}) = s^2
+                \end{aligned}
+            \]
+            So, we have:
+            \[
+                \mathbf a_{A_{lon}} = (0, 0)
+            \]
+            \[
+                \mathcal{A}_{A_{lon}} = \begin{pmatrix}
+                    1 & 0 \\
+                    0 & 1
+                \end{pmatrix}        
+            \]
+            
+            Now, for $\zeta_h=0.707$ and $\omega_{n_h} = 0.275$ the desired closed loop characteristic polynomial is given by:
+            \[
+                \Delta_{cl, lon}^d  = s^2 + 2 \zeta_h \omega_{n_h} s + \omega_{n_h}^2 = s^2 + 0.38885s + 0.075625 
+            \]
+
+            This implies that $\alpha_{lon} = (0.38885, 0.075625)$.
+
+            For lateral dynamics, the open loop characteristic polynomial is given by:
+
+            \[
+                \begin{aligned}
+                    \Delta_{ol, lat} &= det(sI - A_{lat})\\
+                    &= s^4 - 0.0808 s^3
+                \end{aligned}
+            \]
+            So, we have:
+            \[
+                \mathbf a_{A_{lat}} = (-0.0808, 0, 0, 0)
+            \]
+            \[
+                \mathcal{A}_{A_{lat}} = \begin{pmatrix}
+                    1 & -0.0808 & 0 & 0 \\
+                    0 & 1 & -0.0808 & 0 \\
+                    0 & 0 & 1 & -0.0808 \\
+                    0 & 0 & 0 & 1
+                \end{pmatrix}        
+            \]
+
+            Now, for $\zeta_z = \zeta_\theta = 0.707$, $\omega_{n_z} = 0.275$ and $\omega_{n_\theta} = 2.75$ the desired closed loop characteristic polynomial is given by:
+            \[
+                \begin{aligned}
+                    \Delta_{cl, lat}^d &= (s^2 + 2 \zeta_z \omega_{n_z} s + \omega_{n_z}^2)(s^2 + 2 \zeta_\theta \omega_{n_\theta} s + \omega_{n_\theta}^2) \\
+                     &= (s^2 + 0.38885 s + 0.075625)(s^2 + 3.8885 s + 7.5625) \\
+                     &= s^4 + 4.27735 s^3 + 9.15017 s^2 + 3.23475 s + 0.571914
+                \end{aligned}
+            \]
+
+            This implies that $\alpha_{lat} = (4.27735, 9.15017, 3.23475, 0.571914)$.
+
+            \item The matrices are added in the file \texttt{/src/parameters.py}.
+            
+            \item The controllability matrix for lateral dynamics is given by,
+            \[
+                \mathcal{C}_{lat} = \bigl(B_{lat} \  \ A_{lat}B_{lat}\  \ A_{lat}^2B_{lat} \ \ A_{lat}^3B_{lat}\bigr) = \begin{pmatrix}
+                    0 & 0 & 0 & 111.111 \\
+                    0. & 111.111 & 0. & 0. \\
+                    0. & 0. & -1090. & 0. \\
+                    -1090. & 0. & 88.0719 & 0. \\
+                \end{pmatrix}  
+            \]
+
+            Now, $det(\mathcal{C}_{lat}) = -1.46678\mathrm e 10 \ne 0$. Hence, the system is controllable.
+
+            The controllability matrix for longitudinal dynamics is given by,
+            \[
+                \mathcal{C}_{lon} = \bigl(B_{lon}  \ \ A_{lon}B_{lon}\bigr) = \begin{pmatrix}
+                    0 & 0.384615 \\
+                    0.384615 & 0. \\
+                \end{pmatrix}    
+            \]
+
+            Clearly, $det(\mathcal{C}_{lon}) \ne 0$, so the system is controllable.
+
+            \item The gains for longitudinal dynamics are given by:
+            \[ K_{lon} = (\alpha_{lon} - \mathbf a_{A_{lon}})\mathcal A_{A_{lon}}^{-1} C^{-1}_{lon} = (0.196625, 1.01101)\]
+            
+            For \(C_{r, lon} = (1, 0)\) the feedforward reference gain for the longitudinal dynamics is given by: 
+            \[ k_{r, lon} = \cfrac{-1}{C_{r,lon} (A_{lon} - B_{lon} K_{lon})^{-1} B_{lon}} = 1.65428\]
+
+            The gains for lateral dynamics are given by:
+            \[ K_{lat} = (\alpha_{lat} - \mathbf a_{A_{lat}})\mathcal A_{A_{lat}}^{-1} C^{-1}_{lat} = (0.00805788, 0.0855209, -0.00399512, -0.00399831)\]
+
+            For \(C_{r, lat} = (1, 0, 0, 0)\) the feedforward reference gain for the lateral dynamics is given by:
+            \[ k_{r, lat} = \cfrac{-1}{C_{r,lat} (A_{lat} - B_{lat} K_{lat})^{-1} B_{lat}} = -0.0021735\]
+
+            \item TODO
+        \end{enumerate}
+    \end{Objective}
+
+    \begin{Objective}{Full State With Integrator}
+        \begin{enumerate}[(a)]
+            \item TODO
+            \item TODO
+            \item TODO
+        \end{enumerate}    
+    \end{Objective}
+
+    \begin{Objective}{Observer Based Control}
+        \begin{enumerate}[(a)]
+            \item \textit{Completed in process}.
+            \item For longitudinal dynamics, the observability matrix is given by:
+            \[
+                \mathcal{O}_{lon} = \begin{pmatrix}
+                    C_{lon} \\ C_{lon}A_{lon}
+                \end{pmatrix} = \begin{pmatrix}
+                    1 & 0 \\ 0 & 1
+                \end{pmatrix}
+            \]
+
+            Here, $det(\mathcal{O}_{lon}) \ne 0$ so the system is obeservable.
+
+            For lateral dynamics, the observability matrix is given by:
+            \[
+                \mathcal{O}_{lat} = \begin{pmatrix}
+                    C_{lat} \\ C_{lat}A_{lat} \\ C_{lat}A_{lat}^2 \\ C_{lat} A_{lat}^3
+                \end{pmatrix}
+            \]
+
+            Here, it was verified that $det(\mathcal{O}_{lat}) \ne 0$.
+
+            \item TODO
+            \item TODO
+            \item TODO
+        \end{enumerate}
+    \end{Objective}
+
+    \begin{Objective}{Disturbance Observer}
+        \begin{enumerate}
+            \item TODO
+            \item TODO
+        \end{enumerate}
+        
     \end{Objective}
     \pagebreak
 

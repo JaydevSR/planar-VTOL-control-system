@@ -133,3 +133,6 @@ settings.json
 
 #TeX
 *.synctex.gz
+
+# Mathematica
+*.nb
